@@ -36,10 +36,7 @@ jobs:
     - name: Add SPA 404 fallback
       run: cp dist/index.html dist/404.html
       
-    - name: Setup Pages
-      uses: actions/configure-pages@v5
-      with:
-        enablement: true
+    # 移除自动创建Pages站点步骤，改为在仓库设置中手动启用
       
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
