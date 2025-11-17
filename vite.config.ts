@@ -5,7 +5,7 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/simple-calculator/', // GitHub Pages 基础路径
+  base: '/simple-calculator/',
   build: {
     sourcemap: 'hidden',
   },
