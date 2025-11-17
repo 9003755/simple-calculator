@@ -1,113 +1,76 @@
-# 🚀 GitHub Pages 部署状态检查器
-# 用于检查部署进度和最终访问地址
+#!/usr/bin/env python3
+"""
+检查GitHub Pages部署状态的脚本
+"""
 
 import requests
 import time
 import sys
 
-def check_github_pages(username, repo_name):
+def check_deployment():
     """检查GitHub Pages部署状态"""
+    url = "https://9003755.github.io/simple-calculator/"
     
-    pages_url = f"https://{username}.github.io/{repo_name}"
-    repo_api = f"https://api.github.com/repos/{username}/{repo_name}"
-    
-    print(f"🔍 检查部署状态...")
-    print(f"📍 预期访问地址: {pages_url}")
-    print(f"📁 仓库API: {repo_api}")
+    print(f"正在检查部署状态: {url}")
     
     try:
-        # 检查仓库是否存在
-        response = requests.get(repo_api)
+        response = requests.get(url, timeout=30)
+        
         if response.status_code == 200:
-            print("✅ 仓库存在")
+            print("✅ 网站可以正常访问！")
+            print(f"状态码: {response.status_code}")
             
-            # 检查GitHub Pages状态
-            pages_api = f"{repo_api}/pages"
-            pages_response = requests.get(pages_api)
-            
-            if pages_response.status_code == 200:
-                pages_data = pages_response.json()
-                print("✅ GitHub Pages已启用")
-                print(f"🌐 部署状态: {pages_data.get('status', 'unknown')}")
-                print(f"📄 源分支: {pages_data.get('source', {}).get('branch', 'unknown')}")
-                
-                # 尝试访问实际网站
-                print("\n🌐 正在测试网站访问...")
-                site_response = requests.get(pages_url)
-                
-                if site_response.status_code == 200:
-                    print("✅ 网站可正常访问！")
-                    print(f"🎉 访问地址: {pages_url}")
-                    return True
-                else:
-                    print(f"⚠️  网站返回状态码: {site_response.status_code}")
-                    print("⏳ 可能还在部署中，请稍后再试")
-                    return False
+            # 检查页面内容
+            content = response.text
+            if "简约计算器" in content:
+                print("✅ 页面标题正确加载")
             else:
-                print("❌ GitHub Pages未启用")
-                print("📝 请在仓库 Settings -> Pages 中启用GitHub Pages")
-                return False
+                print("⚠️  页面标题可能未正确加载")
+                
+            if "两点之间航向角" in content:
+                print("✅ UI文本更新成功")
+            else:
+                print("⚠️  UI文本可能未更新")
+                
+            if "海边的飞行器VX18520403199" in content:
+                print("✅ 作者信息正确显示")
+            else:
+                print("⚠️  作者信息可能未显示")
+                
+            # 检查关键资源是否加载
+            if "/simple-calculator/assets/" in content:
+                print("✅ 资源路径配置正确")
+            else:
+                print("⚠️  资源路径可能有问题")
+                
+            return True
         else:
-            print(f"❌ 仓库不存在或无法访问 (状态码: {response.status_code})")
+            print(f"❌ 网站访问失败，状态码: {response.status_code}")
             return False
             
     except requests.exceptions.RequestException as e:
-        print(f"❌ 网络错误: {e}")
-        print("📡 请检查网络连接")
-        return False
-    except Exception as e:
-        print(f"❌ 错误: {e}")
+        print(f"❌ 访问出错: {e}")
         return False
 
-def monitor_deployment_progress(username, repo_name, max_attempts=10, delay=30):
-    """监控部署进度"""
-    print(f"⏳ 开始监控部署进度 (最多尝试{max_attempts}次)...")
-    
-    for attempt in range(max_attempts):
-        print(f"\n🔄 第 {attempt + 1} 次检查...")
-        
-        if check_github_pages(username, repo_name):
-            return True
-            
-        if attempt < max_attempts - 1:
-            print(f"⏰ {delay}秒后重试...")
-            time.sleep(delay)
-    
-    print("\n⏰ 监控结束，如仍未部署成功，请手动检查")
-    return False
-
-if __name__ == "__main__":
-    print("🚀 GitHub Pages 部署状态检查器")
+def main():
+    """主函数"""
+    print("GitHub Pages部署状态检查工具")
     print("=" * 40)
     
-    # 获取用户输入
-    username = input("请输入GitHub用户名: ").strip()
-    if not username:
-        print("❌ 用户名不能为空")
-        sys.exit(1)
+    # 最多尝试5次，每次间隔30秒
+    max_attempts = 5
+    for attempt in range(max_attempts):
+        print(f"\n第 {attempt + 1} 次检查:")
+        if check_deployment():
+            print("\n🎉 部署成功！网站运行正常")
+            sys.exit(0)
+        else:
+            if attempt < max_attempts - 1:
+                print(f"等待30秒后重试...")
+                time.sleep(30)
     
-    repo_name = input("请输入仓库名称 (默认: simple-calculator): ").strip()
-    if not repo_name:
-        repo_name = "simple-calculator"
-    
-    print(f"\n📋 检查配置:")
-    print(f"   用户名: {username}")
-    print(f"   仓库名: {repo_name}")
-    print(f"   预期地址: https://{username}.github.io/{repo_name}")
-    
-    check = input("\n是否开始检查? (y/n): ").lower()
-    if check == 'y':
-        # 单次检查
-        check_github_pages(username, repo_name)
-        
-        # 询问是否需要持续监控
-        monitor = input("\n是否需要持续监控部署进度? (y/n): ").lower()
-        if monitor == 'y':
-            monitor_deployment_progress(username, repo_name)
-    else:
-        print("检查取消")
-    
-    print("\n📖 部署完成后，请访问:")
-    print(f"   🌐 网站地址: https://{username}.github.io/{repo_name}")
-    print(f"   📁 仓库地址: https://github.com/{username}/{repo_name}")
-    print("\n✨ 感谢使用部署状态检查器！")
+    print(f"\n❌ 部署检查失败，请手动访问 https://9003755.github.io/simple-calculator/ 确认")
+    sys.exit(1)
+
+if __name__ == "__main__":
+    main()
