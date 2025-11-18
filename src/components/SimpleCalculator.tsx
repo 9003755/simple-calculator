@@ -372,6 +372,11 @@ export default function SimpleCalculator({ onAuthorClick }: SimpleCalculatorProp
 
   const renderDistanceCalculator = () => (
     <div className="space-y-4">
+      <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+        <p className="text-blue-800 text-sm">
+          <strong>功能说明：</strong>输入两点的经纬度，可以自动计算两点之间的距离以及两点之间航向角
+        </p>
+      </div>
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setCoordFormat('deg')}
